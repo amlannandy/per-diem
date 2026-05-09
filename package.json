@@ -1,0 +1,12 @@
+{
+  "name": "per-diem",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --filter @per-diem/types build && pnpm --parallel --filter !@per-diem/types dev",
+    "build": "pnpm --filter @per-diem/types build && pnpm --parallel --filter !@per-diem/types build",
+    "typecheck": "pnpm --filter @per-diem/types build && pnpm --parallel --filter !@per-diem/types typecheck"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5"
+  }
+}

@@ -12,7 +12,9 @@
   "dependencies": {
     "@per-diem/types": "workspace:*",
     "cors": "^2.8.6",
-    "express": "^4.19.2"
+    "dotenv": "^17.4.2",
+    "express": "^4.19.2",
+    "square": "^44.0.1"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",

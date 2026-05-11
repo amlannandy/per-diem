@@ -117,7 +117,8 @@ export function createCatalogRouter(client: SquareClient): IRouter {
             id: obj.id,
             name: data.name ?? 'Unnamed Item',
             description: data.description ?? undefined,
-            categoryId: data.categoryId ?? undefined,
+            // categoryId is deprecated since 2023-12-13; categories[] is the current field
+            categoryId: data.categories?.[0]?.id ?? data.categoryId ?? undefined,
             imageUrl,
             variations,
             modifierLists,

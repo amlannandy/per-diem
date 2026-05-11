@@ -73,8 +73,35 @@ async function seed() {
       {
         objects: [
           // ---------------------------------------------------------------
+          // Availability periods — one object per day (Square's model)
+          // Breakfast: 07:00–11:00 every day
+          // ---------------------------------------------------------------
+          ...(['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'] as const).map((day) => ({
+            type: 'AVAILABILITY_PERIOD' as const,
+            id: `#avail-breakfast-${day.toLowerCase()}`,
+            presentAtAllLocations: true,
+            availabilityPeriodData: {
+              startLocalTime: '07:00:00',
+              endLocalTime: '11:00:00',
+              dayOfWeek: day,
+            },
+          })),
+
+          // ---------------------------------------------------------------
           // Categories
           // ---------------------------------------------------------------
+          {
+            type: 'CATEGORY',
+            id: '#cat-breakfast',
+            presentAtAllLocations: true,
+            categoryData: {
+              name: 'Breakfast',
+              // Link all 7 daily periods — items in this category only appear 07:00–11:00
+              availabilityPeriodIds: (['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'] as const).map(
+                (day) => `#avail-breakfast-${day.toLowerCase()}`
+              ),
+            },
+          },
           {
             type: 'CATEGORY',
             id: '#cat-burgers',
@@ -145,7 +172,7 @@ async function seed() {
             itemData: {
               name: 'Classic Cheeseburger',
               description: 'Beef patty, cheddar cheese, lettuce, tomato, pickles, and onion on a brioche bun.',
-              categoryId: '#cat-burgers',
+              categories: [{ id: '#cat-burgers' }],
               modifierListInfo: [{ modifierListId: '#mod-sauces', enabled: true }],
               variations: [
                 {
@@ -168,7 +195,7 @@ async function seed() {
             itemData: {
               name: 'Mushroom Swiss Burger',
               description: 'Beef patty, sautéed mushrooms, melted Swiss cheese, and garlic aioli.',
-              categoryId: '#cat-burgers',
+              categories: [{ id: '#cat-burgers' }],
               modifierListInfo: [{ modifierListId: '#mod-sauces', enabled: true }],
               variations: [
                 {
@@ -186,7 +213,7 @@ async function seed() {
             itemData: {
               name: 'Veggie Burger',
               description: 'Black bean patty, avocado, roasted peppers, and chipotle mayo.',
-              categoryId: '#cat-burgers',
+              categories: [{ id: '#cat-burgers' }],
               modifierListInfo: [{ modifierListId: '#mod-sauces', enabled: true }],
               variations: [
                 {
@@ -206,7 +233,7 @@ async function seed() {
             itemData: {
               name: 'Spicy Jalapeño Burger',
               description: 'Location exclusive. Beef patty, fresh jalapeños, pepper jack, and chipotle mayo.',
-              categoryId: '#cat-burgers',
+              categories: [{ id: '#cat-burgers' }],
               variations: [
                 {
                   type: 'ITEM_VARIATION',
@@ -229,7 +256,7 @@ async function seed() {
             itemData: {
               name: 'French Fries',
               description: 'Crispy golden fries seasoned with sea salt and served with house dipping sauce.',
-              categoryId: '#cat-sides',
+              categories: [{ id: '#cat-sides' }],
               variations: [
                 {
                   type: 'ITEM_VARIATION',
@@ -251,7 +278,7 @@ async function seed() {
             itemData: {
               name: 'Onion Rings',
               description: 'Beer-battered onion rings, golden and crispy, served with ranch.',
-              categoryId: '#cat-sides',
+              categories: [{ id: '#cat-sides' }],
               variations: [
                 {
                   type: 'ITEM_VARIATION',
@@ -272,7 +299,7 @@ async function seed() {
             itemData: {
               name: 'Fountain Soda',
               description: 'Choice of Coke, Diet Coke, Sprite, or Lemonade. Free refills.',
-              categoryId: '#cat-drinks',
+              categories: [{ id: '#cat-drinks' }],
               variations: [
                 {
                   type: 'ITEM_VARIATION',
@@ -294,7 +321,7 @@ async function seed() {
             itemData: {
               name: 'Milkshake',
               description: 'Thick and creamy hand-spun shake. Chocolate, vanilla, or strawberry.',
-              categoryId: '#cat-drinks',
+              categories: [{ id: '#cat-drinks' }],
               variations: [
                 {
                   type: 'ITEM_VARIATION',
@@ -315,12 +342,50 @@ async function seed() {
             itemData: {
               name: 'Chocolate Brownie',
               description: 'Warm fudge brownie topped with vanilla ice cream and chocolate drizzle.',
-              categoryId: '#cat-desserts',
+              categories: [{ id: '#cat-desserts' }],
               variations: [
                 {
                   type: 'ITEM_VARIATION',
                   id: '#var-brownie',
                   itemVariationData: { name: 'Regular', priceMoney: { amount: BigInt(499), currency: 'USD' } },
+                },
+              ],
+            },
+          },
+
+          // ---------------------------------------------------------------
+          // Breakfast — only available 07:00–11:00 every day
+          // ---------------------------------------------------------------
+          {
+            type: 'ITEM',
+            id: '#item-pancakes',
+            presentAtAllLocations: true,
+            itemData: {
+              name: 'Buttermilk Pancakes',
+              description: 'Fluffy stack of three pancakes with maple syrup and butter.',
+              categories: [{ id: '#cat-breakfast' }],
+              variations: [
+                {
+                  type: 'ITEM_VARIATION',
+                  id: '#var-pancakes',
+                  itemVariationData: { name: 'Regular', priceMoney: { amount: BigInt(799), currency: 'USD' } },
+                },
+              ],
+            },
+          },
+          {
+            type: 'ITEM',
+            id: '#item-eggs-benedict',
+            presentAtAllLocations: true,
+            itemData: {
+              name: 'Eggs Benedict',
+              description: 'Poached eggs, Canadian bacon, and hollandaise on an English muffin.',
+              categories: [{ id: '#cat-breakfast' }],
+              variations: [
+                {
+                  type: 'ITEM_VARIATION',
+                  id: '#var-eggs-benedict',
+                  itemVariationData: { name: 'Regular', priceMoney: { amount: BigInt(1199), currency: 'USD' } },
                 },
               ],
             },
@@ -352,6 +417,8 @@ async function seed() {
     ['#item-soda', 'soda-drink'],
     ['#item-milkshake', 'milkshake'],
     ['#item-brownie', 'chocolate-brownie'],
+    ['#item-pancakes', 'pancakes'],
+    ['#item-eggs-benedict', 'eggs-benedict'],
   ];
 
   for (const [tempId, imageLabel] of itemImages) {

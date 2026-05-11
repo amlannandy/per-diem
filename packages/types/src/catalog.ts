@@ -40,6 +40,7 @@ export interface MenuCategory {
   id: string;
   name: string;
   ordinal: number;
+  isAvailableNow: boolean;
 }
 
 export interface CatalogResponse {

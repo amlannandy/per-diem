@@ -17,9 +17,14 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
 
-  const activeLocationId = selectedLocationId ?? locations?.[0]?.id ?? null;
+  const activeLocation = locations?.find((l) => l.id === selectedLocationId) ?? locations?.[0] ?? null;
+  const activeLocationId = activeLocation?.id ?? null;
+  const activeTimezone = activeLocation?.timezone ?? null;
 
-  const { data: catalog, isPending: catalogPending, isError: catalogError } = useCatalog(activeLocationId);
+  const { data: catalog, isPending: catalogPending, isError: catalogError } = useCatalog(
+    activeLocationId,
+    activeTimezone,
+  );
 
   if (locationsPending) return <LoadingState message='Loading locations...' />;
   if (locationsError || !locations?.length) return <ErrorState message='Failed to load locations' />;
@@ -74,6 +79,7 @@ export default function App() {
                 <MenuSection
                   key={category.id}
                   title={category.name}
+                  isAvailableNow={category.isAvailableNow}
                   items={items}
                   onItemClick={setSelectedItem}
                 />
@@ -82,6 +88,7 @@ export default function App() {
               {uncategorised.length > 0 && (
                 <MenuSection
                   title='Other'
+                  isAvailableNow={true}
                   items={uncategorised}
                   onItemClick={setSelectedItem}
                 />

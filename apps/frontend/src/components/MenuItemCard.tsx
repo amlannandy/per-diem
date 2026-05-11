@@ -5,24 +5,25 @@ import type { MenuItem } from '@per-diem/types';
 interface Props {
   item: MenuItem;
   onClick: (item: MenuItem) => void;
+  disabled?: boolean;
 }
 
 function formatPrice(amount: number, currency: string): string {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(amount / 100);
 }
 
-export function MenuItemCard({ item, onClick }: Props) {
+export function MenuItemCard({ item, onClick, disabled = false }: Props) {
   const lowestPrice = item.variations
     .filter((v) => v.price)
     .sort((a, b) => (a.price!.amount - b.price!.amount))[0]?.price;
 
   return (
     <motion.button
-      onClick={() => onClick(item)}
-      whileHover={{ y: -2, boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}
-      whileTap={{ scale: 0.98 }}
+      onClick={() => !disabled && onClick(item)}
+      whileHover={!disabled ? { y: -2, boxShadow: '0 4px 16px rgba(0,0,0,0.08)' } : {}}
+      whileTap={!disabled ? { scale: 0.98 } : {}}
       transition={{ duration: 0.15 }}
-      className='flex w-full cursor-pointer items-center gap-4 rounded-xl border border-gray-100 bg-white p-4 text-left'
+      className={`flex w-full items-center gap-4 rounded-xl border border-gray-100 bg-white p-4 text-left ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'}`}
     >
       <div className='size-20 shrink-0 overflow-hidden rounded-lg bg-gray-100'>
         {item.imageUrl ? (

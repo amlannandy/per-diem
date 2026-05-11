@@ -1,16 +1,11 @@
 import { motion, AnimatePresence } from 'motion/react';
 import { X, ImageOff } from 'lucide-react';
 import type { MenuItem } from '@per-diem/types';
+import { formatPrice } from '../utils/format';
 
 interface ItemDetailModalProps {
   item: MenuItem | null;
   onClose: () => void;
-}
-
-function formatPrice(amount: number, currency: string): string {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(
-    amount / 100,
-  );
 }
 
 export function ItemDetailModal({ item, onClose }: ItemDetailModalProps) {

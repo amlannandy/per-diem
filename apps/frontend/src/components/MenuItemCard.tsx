@@ -1,17 +1,12 @@
 import { motion } from 'motion/react';
 import { ImageOff } from 'lucide-react';
 import type { MenuItem } from '@per-diem/types';
+import { formatPrice } from '../utils/format';
 
 interface MenuItemCardProps {
   item: MenuItem;
   onClick: (item: MenuItem) => void;
   disabled?: boolean;
-}
-
-function formatPrice(amount: number, currency: string): string {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(
-    amount / 100,
-  );
 }
 
 export function MenuItemCard({

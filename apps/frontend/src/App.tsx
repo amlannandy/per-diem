@@ -1,50 +1,88 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useLocations } from './hooks/useLocations';
 import { useCatalog } from './hooks/useCatalog';
 import { LocationSwitcher } from './components/LocationSwitcher';
 import { CategoryFilter } from './components/CategoryFilter';
 import { SearchBar } from './components/SearchBar';
 import { MenuSection } from './components/MenuSection';
-import { LoadingState } from './components/LoadingState';
 import { ErrorState } from './components/ErrorState';
 import { ItemDetailModal } from './components/ItemDetailModal';
+import { MenuSkeleton } from './components/MenuSkeleton';
+import { AppSkeleton } from './components/AppSkeleton';
 import type { MenuItem } from '@per-diem/types';
 
 export default function App() {
-  const { data: locations, isPending: locationsPending, isError: locationsError } = useLocations();
-  const [selectedLocationId, setSelectedLocationId] = useState<string | null>(null);
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+  const {
+    data: locations,
+    isPending: locationsPending,
+    isError: locationsError,
+    refetch: refetchLocations,
+  } = useLocations();
+
+  const [selectedLocationId, setSelectedLocationId] = useState<string | null>(
+    null,
+  );
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
+    null,
+  );
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
 
-  const activeLocation = locations?.find((l) => l.id === selectedLocationId) ?? locations?.[0] ?? null;
+  const activeLocation =
+    locations?.find(l => l.id === selectedLocationId) ?? locations?.[0] ?? null;
   const activeLocationId = activeLocation?.id ?? null;
   const activeTimezone = activeLocation?.timezone ?? null;
 
-  const { data: catalog, isPending: catalogPending, isError: catalogError } = useCatalog(
-    activeLocationId,
-    activeTimezone,
+  const {
+    data: catalog,
+    isPending: catalogPending,
+    isError: catalogError,
+    refetch: refetchCatalog,
+  } = useCatalog(activeLocationId, activeTimezone);
+
+  const visibleItems = useMemo(
+    () =>
+      (catalog?.items ?? []).filter(item => {
+        const matchesCategory =
+          !selectedCategoryId || item.categoryId === selectedCategoryId;
+        const matchesSearch =
+          !searchQuery ||
+          item.name.toLowerCase().includes(searchQuery.toLowerCase());
+        return matchesCategory && matchesSearch;
+      }),
+    [catalog?.items, selectedCategoryId, searchQuery],
   );
-
-  if (locationsPending) return <LoadingState message='Loading locations...' />;
-  if (locationsError || !locations?.length) return <ErrorState message='Failed to load locations' />;
-
-  const visibleItems = (catalog?.items ?? []).filter((item) => {
-    const matchesCategory = !selectedCategoryId || item.categoryId === selectedCategoryId;
-    const matchesSearch = !searchQuery || item.name.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
 
   const visibleCategories = catalog?.categories ?? [];
 
-  const groupedItems = visibleCategories
-    .map((category) => ({
-      category,
-      items: visibleItems.filter((item) => item.categoryId === category.id),
-    }))
-    .filter(({ items }) => items.length > 0);
+  const groupedItems = useMemo(
+    () =>
+      visibleCategories
+        .map(category => ({
+          category,
+          items: visibleItems.filter(item => item.categoryId === category.id),
+        }))
+        .filter(({ items }) => items.length > 0),
+    [visibleCategories, visibleItems],
+  );
 
-  const uncategorised = visibleItems.filter((item) => !item.categoryId);
+  const uncategorised = useMemo(
+    () => visibleItems.filter(item => !item.categoryId),
+    [visibleItems],
+  );
+
+  if (locationsPending) {
+    return <AppSkeleton />;
+  }
+
+  if (locationsError || !locations?.length) {
+    return (
+      <ErrorState
+        message='Failed to load locations'
+        onRetry={refetchLocations}
+      />
+    );
+  }
 
   return (
     <div className='mx-auto max-w-3xl px-4 py-8'>
@@ -54,15 +92,17 @@ export default function App() {
         <LocationSwitcher
           locations={locations}
           selectedId={activeLocationId!}
-          onSelect={(id) => {
+          onSelect={id => {
             setSelectedLocationId(id);
             setSelectedCategoryId(null);
             setSearchQuery('');
           }}
         />
 
-        {catalogPending && <LoadingState message='Loading menu...' />}
-        {catalogError && <ErrorState message='Failed to load menu' />}
+        {catalogPending && <MenuSkeleton />}
+        {catalogError && (
+          <ErrorState message='Failed to load menu' onRetry={refetchCatalog} />
+        )}
 
         {catalog && (
           <div className='space-y-6'>
@@ -96,7 +136,9 @@ export default function App() {
 
               {visibleItems.length === 0 && (
                 <p className='py-12 text-center text-gray-400'>
-                  {searchQuery ? `No results for "${searchQuery}"` : 'No items available.'}
+                  {searchQuery
+                    ? `No results for "${searchQuery}"`
+                    : 'No items available.'}
                 </p>
               )}
             </div>
@@ -104,7 +146,10 @@ export default function App() {
         )}
       </div>
 
-      <ItemDetailModal item={selectedItem} onClose={() => setSelectedItem(null)} />
+      <ItemDetailModal
+        item={selectedItem}
+        onClose={() => setSelectedItem(null)}
+      />
     </div>
   );
 }

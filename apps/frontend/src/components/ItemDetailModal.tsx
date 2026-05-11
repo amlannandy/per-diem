@@ -2,16 +2,18 @@ import { motion, AnimatePresence } from 'motion/react';
 import { X, ImageOff } from 'lucide-react';
 import type { MenuItem } from '@per-diem/types';
 
-interface Props {
+interface ItemDetailModalProps {
   item: MenuItem | null;
   onClose: () => void;
 }
 
 function formatPrice(amount: number, currency: string): string {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(amount / 100);
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(
+    amount / 100,
+  );
 }
 
-export function ItemDetailModal({ item, onClose }: Props) {
+export function ItemDetailModal({ item, onClose }: ItemDetailModalProps) {
   return (
     <AnimatePresence>
       {item && (
@@ -31,8 +33,7 @@ export function ItemDetailModal({ item, onClose }: Props) {
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
-            transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-          >
+            transition={{ type: 'spring', damping: 30, stiffness: 300 }}>
             {/* Drag handle */}
             <div className='flex justify-center pt-3 pb-1'>
               <div className='h-1 w-10 rounded-full bg-gray-200' />
@@ -42,8 +43,7 @@ export function ItemDetailModal({ item, onClose }: Props) {
             <div className='flex justify-end px-4 pt-2'>
               <button
                 onClick={onClose}
-                className='cursor-pointer rounded-full p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600'
-              >
+                className='cursor-pointer rounded-full p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600'>
                 <X className='size-5' />
               </button>
             </div>
@@ -69,7 +69,9 @@ export function ItemDetailModal({ item, onClose }: Props) {
 
               {/* Description */}
               {item.description && (
-                <p className='text-sm leading-relaxed text-gray-500'>{item.description}</p>
+                <p className='text-sm leading-relaxed text-gray-500'>
+                  {item.description}
+                </p>
               )}
 
               {/* Variations */}
@@ -79,15 +81,19 @@ export function ItemDetailModal({ item, onClose }: Props) {
                     {item.variations.length === 1 ? 'Price' : 'Options'}
                   </h3>
                   <div className='space-y-2'>
-                    {item.variations.map((variation) => (
+                    {item.variations.map(variation => (
                       <div
                         key={variation.id}
-                        className='flex items-center justify-between rounded-lg border border-gray-100 px-4 py-3'
-                      >
-                        <span className='text-sm text-gray-700'>{variation.name}</span>
+                        className='flex items-center justify-between rounded-lg border border-gray-100 px-4 py-3'>
+                        <span className='text-sm text-gray-700'>
+                          {variation.name}
+                        </span>
                         {variation.price && (
                           <span className='text-sm font-semibold text-gray-900'>
-                            {formatPrice(variation.price.amount, variation.price.currency)}
+                            {formatPrice(
+                              variation.price.amount,
+                              variation.price.currency,
+                            )}
                           </span>
                         )}
                       </div>
@@ -97,24 +103,31 @@ export function ItemDetailModal({ item, onClose }: Props) {
               )}
 
               {/* Modifier lists */}
-              {item.modifierLists.map((list) => (
+              {item.modifierLists.map(list => (
                 <div key={list.id}>
                   <div className='mb-3 flex items-center gap-2'>
                     <h3 className='font-semibold text-gray-900'>{list.name}</h3>
                     <span className='text-xs text-gray-400'>
-                      {list.selectionType === 'SINGLE' ? 'Pick one' : 'Pick many'}
+                      {list.selectionType === 'SINGLE'
+                        ? 'Pick one'
+                        : 'Pick many'}
                     </span>
                   </div>
                   <div className='space-y-2'>
-                    {list.options.map((option) => (
+                    {list.options.map(option => (
                       <div
                         key={option.id}
-                        className='flex items-center justify-between rounded-lg border border-gray-100 px-4 py-3'
-                      >
-                        <span className='text-sm text-gray-700'>{option.name}</span>
+                        className='flex items-center justify-between rounded-lg border border-gray-100 px-4 py-3'>
+                        <span className='text-sm text-gray-700'>
+                          {option.name}
+                        </span>
                         {option.price && option.price.amount > 0 && (
                           <span className='text-sm text-gray-500'>
-                            +{formatPrice(option.price.amount, option.price.currency)}
+                            +
+                            {formatPrice(
+                              option.price.amount,
+                              option.price.currency,
+                            )}
                           </span>
                         )}
                       </div>

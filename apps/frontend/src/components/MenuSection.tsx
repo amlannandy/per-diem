@@ -3,14 +3,19 @@ import { Clock } from 'lucide-react';
 import type { MenuItem } from '@per-diem/types';
 import { MenuItemCard } from './MenuItemCard';
 
-interface Props {
+interface MenuSectionProps {
   title: string;
   isAvailableNow: boolean;
   items: MenuItem[];
   onItemClick: (item: MenuItem) => void;
 }
 
-export function MenuSection({ title, isAvailableNow, items, onItemClick }: Props) {
+export function MenuSection({
+  title,
+  isAvailableNow,
+  items,
+  onItemClick,
+}: MenuSectionProps) {
   return (
     <section className={isAvailableNow ? '' : 'opacity-50'}>
       <div className='mb-3 flex items-center gap-2'>
@@ -28,16 +33,14 @@ export function MenuSection({ title, isAvailableNow, items, onItemClick }: Props
         animate='visible'
         variants={{
           visible: { transition: { staggerChildren: 0.05 } },
-        }}
-      >
-        {items.map((item) => (
+        }}>
+        {items.map(item => (
           <motion.div
             key={item.id}
             variants={{
               hidden: { opacity: 0, y: 8 },
               visible: { opacity: 1, y: 0 },
-            }}
-          >
+            }}>
             <MenuItemCard
               item={item}
               onClick={isAvailableNow ? onItemClick : () => {}}
